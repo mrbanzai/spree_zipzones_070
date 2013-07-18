@@ -1,6 +1,14 @@
 <%= render :partial => 'spree/admin/shared/configuration_menu' %>
 
-<h1><%= t(:editing_zipcode) %></h1>
+<% content_for :page_title do %>
+  <%= t(:editing_zip_code) %>
+<% end %>
+
+<% content_for :page_actions do %>
+  <li>
+    <%= button_link_to t(:back_to_zip_codes_list), admin_zip_codes_path, :icon => 'icon-arrow-left' %>
+  </li>
+<% end %>
 
 <%= render :partial => 'spree/shared/error_messages', :locals => { :target => @zipcode } %>
 
