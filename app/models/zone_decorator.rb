@@ -32,4 +32,16 @@ def include?(address)
   end
 end
 
+# Zipcode kind should be checked before state and country.
+def self.match(address)
+  return unless matches = self.includes(:zone_members).order('zone_members_count', 'created_at').select { |zone| zone.include? address }
+
+  ['zipcode', 'state', 'country'].each do |zone_kind|
+    if match = matches.detect { |zone| zone_kind == zone.kind }
+      return match
+    end
+  end
+  matches.first
+end
+
 end # Zone
