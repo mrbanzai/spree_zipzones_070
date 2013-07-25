@@ -32,6 +32,25 @@ def include?(address)
   end
 end
 
+# Indicates whether the specified zone falls entirely within the zone performing
+# the check.
+def contains?(target)
+  return false if kind == 'state' && target.kind == 'country'
+  return false if kind == 'zipcode' && ['country', 'state'].include?(target.kind)
+  return false if zone_members.empty? || target.zone_members.empty?
+
+  if kind == target.kind
+    target.zoneables.each do |target_zoneable|
+      return false unless zoneables.include?(target_zoneable)
+    end
+  else
+    target.zoneables.each do |target_state|
+      return false unless zoneables.include?(target_state.country)
+    end
+  end
+  true
+end
+
 # Zipcode kind should be checked before state and country.
 def self.match(address)
   return unless matches = self.includes(:zone_members).order('zone_members_count', 'created_at').select { |zone| zone.include? address }
