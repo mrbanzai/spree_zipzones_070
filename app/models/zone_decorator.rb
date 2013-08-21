@@ -17,7 +17,7 @@ end
 # Check for whether an address.zipcode is available
 def include?(address)
   return false unless address
-  
+
   members.any? do |zone_member|
     case zone_member.zoneable_type
     when "Spree::Country"
@@ -53,14 +53,15 @@ end
 
 # Zipcode kind should be checked before state and country.
 def self.match(address)
-  return unless matches = self.includes(:zone_members).order('zone_members_count', 'created_at').select { |zone| zone.include? address }
+  zip_code = Spree::Zipcode.find_by_name(address.zipcode)
 
-  ['zipcode', 'state', 'country'].each do |zone_kind|
-    if match = matches.detect { |zone| zone_kind == zone.kind }
-      return match
+  [zip_code, address.state, address.country].each do |zoneable|
+    next if zoneable.nil?
+    if match = self.joins(:zone_members).merge(Spree::ZoneMember.for_zoneable(zoneable)).order('zone_members_count', 'created_at')
+      return match.first
     end
   end
-  matches.first
+  return
 end
 
 end # Zone
