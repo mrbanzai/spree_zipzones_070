@@ -13,6 +13,12 @@ def kind
   end
 end
 
+def zoneables
+  member_ids = members.map(&:zoneable_id)
+
+  klass = Spree.const_get(kind.capitalize)
+  klass.where(:id => member_ids)
+end
 
 # Check for whether an address.zipcode is available
 def include?(address)
@@ -43,7 +49,18 @@ def contains?(target)
     target.zoneables.each do |target_zoneable|
       return false unless zoneables.include?(target_zoneable)
     end
-  else
+  elsif target.kind == 'zipcode'
+    target.zoneables.each do |target_zip|
+      # zips contained in states
+      if kind == 'state'
+        return false unless zoneables.include?(target_zip.state)
+      # zips contained in countries
+      elsif kind == 'country'
+        return false unless zoneables.include?(target_zip.state.try(:country))
+      end
+    end
+  elsif
+    # states contained in countries
     target.zoneables.each do |target_state|
       return false unless zoneables.include?(target_state.country)
     end
