@@ -53,8 +53,8 @@ end
 
 # Zipcode kind should be checked before state and country.
 def self.match(address)
+  return unless address
   zip_code = Spree::Zipcode.find_by_name(address.zipcode)
-
   [zip_code, address.state, address.country].each do |zoneable|
     next if zoneable.nil?
     if match = self.joins(:zone_members).merge(Spree::ZoneMember.for_zoneable(zoneable)).order('zone_members_count', 'created_at')
